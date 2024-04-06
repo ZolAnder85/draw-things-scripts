@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"sourceMap": false,
+		"removeComments": false,
+		"target": "ES2018",
+		"outFile": "../../Distribution/ParseBatchPrompt.js",
+		"lib": [
+			"ES2018"
+		]
+	},
+	"files": [
+		"ParseBatchPrompt.ts"
+	]
+}
