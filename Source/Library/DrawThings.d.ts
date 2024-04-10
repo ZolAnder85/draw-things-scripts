@@ -9,6 +9,7 @@ interface ControlConfig {
 	guidanceStart: number;
 	guidanceEnd: number;
 	noPrompt: boolean;
+	controlImportance: string;
 	downSamplingRate: number;
 	globalAveragePooling: boolean;
 }
@@ -16,7 +17,8 @@ interface ControlConfig {
 declare const enum SeedMode {
 	legacy = 0,
 	torch = 1,
-	default = 2
+	default = 2,
+	nvidia = 3
 }
 
 declare const enum Upscaler {
@@ -25,8 +27,8 @@ declare const enum Upscaler {
 	RealESRGANAnime = "realesrgan_x4plus_anime_f16.ckpt",
 	UniversalUpscaler = "esrgan_4x_universal_upscaler_v2_sharp_f16.ckpt",
 	Remacri = "remacri_4x_f16.ckpt",
-	UltraSharp = "4x_ultrasharp_f16.ckpt",
-	disabled = null
+	UltraSharp = "4x_ultrasharp_f16.ckpt"
+	// disabled = null
 }
 
 declare const enum Sampler {
@@ -39,18 +41,18 @@ declare const enum Sampler {
 	LCM = 6,
 	EulerASubStep = 7,
 	DPMPPSDESubStep = 8,
-	TCD = 9
+	TCD = 9,
+	EulerATrailing = 10,
+	DPMPPSDETrailing = 11
 }
 
-declare const enum Restoration {
-	RestoreFormer = "restoreformer_v1.0_f16.ckpt",
-	disabled = null
+declare const enum FaceRestoration {
+	RestoreFormer = "restoreformer_v1.0_f16.ckpt"
+	// disabled = null
 }
 
-// TODO:
-// Optional members?
-// Add missing parameters.
 interface Configuration {
+	model: string;
 	loras: LoRAConfig[];
 	controls: ControlConfig[];
 	strength: number;
@@ -58,11 +60,13 @@ interface Configuration {
 	seedMode: SeedMode;
 	width: number;
 	height: number;
-	upscaler: Upscaler
+	upscaler: Upscaler;
 	steps: number;
-	shift: number;
 	guidanceScale: number;
 	sampler: Sampler;
+	stochasticSamplingGamma: number;
+	shift: number;
+	sharpness: number;
 	refinerModel: string;
 	refinerStart: number;
 	originalImageWidth: number;
@@ -78,7 +82,9 @@ interface Configuration {
 	zeroNegativePrompt: boolean;
 	clipSkip: number;
 	maskBlur: number;
-	faceRestoration: Restoration;
+	maskBlurOutset: number;
+	preserveOriginalAfterInpaint: boolean;
+	faceRestoration: FaceRestoration;
 	hiresFix: boolean;
 	hiresFixWidth: number;
 	hiresFixHeight: number;
@@ -90,6 +96,18 @@ interface Configuration {
 	imagePriorSteps: number;
 	clipWeight: number;
 	id: number;
+	tiledDecoding: boolean;
+	decodingTileWidth: number;
+	decodingTileHeight: number;
+	decodingTileOverlap: number;
+	stage2Guidance: number;
+	stage2Steps: number;
+	stage2Shift: number;
+	fps: number;
+	numFrames: number;
+	startFrameGuidance: number;
+	guidingFrameNoise: number;
+	motionScale: number
 }
 
 interface PipelinePrompts {

@@ -1,4 +1,4 @@
-abstract class SimpleCatalogue {
+class SimpleCatalogue {
 	protected name: string;
 	protected map: any;
 
@@ -28,7 +28,7 @@ class CKPTCatalogue extends SimpleCatalogue {
 	}
 }
 
-class IntCatalogue extends CKPTCatalogue {
+class IntCatalogue extends SimpleCatalogue {
 	protected handle(value: string): any {
 		const result = parseInt(value);
 		if (isNaN(result)) {

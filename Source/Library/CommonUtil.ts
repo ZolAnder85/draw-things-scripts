@@ -37,6 +37,10 @@ function printAllProperties(object: object): void {
 	printProperties(object, getAllPropertyNames(object));
 }
 
+function cleanPrompt(): string {
+	return pipeline.prompts.prompt.trim().replace(/\r\n|\r|\u2028/g, "\n");
+}
+
 class XSRandom {
 	public static next(seed: number): number {
 		seed = seed ^ (seed << 13);

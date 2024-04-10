@@ -7,18 +7,18 @@ class ParameterList {
 		this.count = 0;
 	}
 
-	public nextString(fallback: string): string {
+	public nextString(fallBack: string = undefined): string {
 		if (this.parameters.length) {
 			++this.count;
 			return this.parameters.shift();
 		}
-		if (fallback === undefined) {
+		if (fallBack === undefined) {
 			throw `String parameter at ${this.count} is missing.`;
 		}
-		return fallback;
+		return fallBack;
 	}
 
-	public nextFloat(fallback: number): number {
+	public nextFloat(fallBack: number = undefined): number {
 		if (this.parameters.length) {
 			++this.count;
 			const result = parseFloat(this.parameters.shift());
@@ -27,13 +27,13 @@ class ParameterList {
 			}
 			return result;
 		}
-		if (fallback === undefined) {
+		if (fallBack === undefined) {
 			throw `Number parameter at ${this.count} is missing.`;
 		}
-		return fallback;
+		return fallBack;
 	}
 
-	public nextInt(fallback: number): number {
+	public nextInt(fallBack: number = undefined): number {
 		if (this.parameters.length) {
 			++this.count;
 			const result = parseInt(this.parameters.shift());
@@ -42,13 +42,13 @@ class ParameterList {
 			}
 			return result;
 		}
-		if (fallback === undefined) {
+		if (fallBack === undefined) {
 			throw `Integer parameter at ${this.count} is missing.`;
 		}
-		return fallback;
+		return fallBack;
 	}
 
-	public nextBool(fallback: boolean): boolean {
+	public nextBool(fallBack: boolean = undefined): boolean {
 		if (this.parameters.length) {
 			++this.count;
 			switch (this.parameters.shift()) {
@@ -64,10 +64,10 @@ class ParameterList {
 					throw `Parameter at ${this.count} is not a boolean.`;
 			}
 		}
-		if (fallback === undefined) {
+		if (fallBack === undefined) {
 			throw `Boolean parameter at ${this.count} is missing.`;
 		}
-		return fallback;
+		return fallBack;
 	}
 
 	public checkEmpty(name): void {

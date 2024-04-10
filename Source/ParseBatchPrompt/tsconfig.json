@@ -1,9 +1,9 @@
 {
 	"compilerOptions": {
 		"sourceMap": false,
-		"removeComments": false,
+		"removeComments": true,
 		"target": "ES2018",
-		"outFile": "../../Distribution/ParseBatchPrompt.js",
+		"outFile": "../../Distribution/Parse Batch Prompt.js",
 		"lib": [
 			"ES2018"
 		]
