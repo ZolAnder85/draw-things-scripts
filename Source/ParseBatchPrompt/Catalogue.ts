@@ -73,18 +73,18 @@ const upscalerCatalogue = new CKPTCatalogue("upscaler", {
 });
 
 const samplerCatalogue = new IntCatalogue("sampler", {
-	"DPM++-2M-Karras": 0,
-	"Euler-Ancestral": 1,
+	DPMPP2MKarras: 0,
+	EulerAncestral: 1,
 	DDIM: 2,
 	PLMS: 3,
-	"DPM++-SDE-Karras": 4,
+	DPMPPSDEKarras: 4,
 	UniPC: 5,
 	LCM: 6,
-	"Euler-A-SubStep": 7,
-	"DPM++-SDE-SubStep": 8,
+	EulerASubStep: 7,
+	DPMPPSDESubStep: 8,
 	TCD: 9,
-	"Euler-A-Trailing": 10,
-	"DPM++-SDE-Trailing": 11
+	EulerATrailing: 10,
+	DPMPPSDETrailing: 11
 });
 
 const faceRestorationCatalogue = new CKPTCatalogue("face restoration", {

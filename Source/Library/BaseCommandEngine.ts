@@ -9,18 +9,16 @@ abstract class BaseCommandEngine {
 	protected commands: CommandMap;
 
 	public handleBlock(block: string): void {
-		console.log("Handling Block:");
-		console.log(block);
-		console.log("\n");
 		for (const line of block.split("\n")) {
 			this.handleLine(line.trim());
 		}
 		this.handleEnd();
-		console.log("\n");
 	}
 
 	public handleLine(line: string): void {
-		if (line.startsWith("/")) {
+		if (line.startsWith("//")) {
+			console.log(line.substring(2).trim());
+		} else if (line.startsWith("/")) {
 			try {
 				this.handleCommand(line.substring(1).trim());
 			} catch (message) {
@@ -31,14 +29,17 @@ abstract class BaseCommandEngine {
 				console.log(`Error message: ${message}`);
 			}
 		} else if (line.startsWith("-")) {
-			this.handleNegative(line.substring(1).trim());
+			line = line.substring(1).trim();
+			if (line) {
+				this.handleNegative(this.cleanLine(line));
+			}
 		} else if (line) {
-			this.handlePositive(line);
+			this.handlePositive(this.cleanLine(line));
 		}
 	}
 
 	protected handleCommand(line: string): void {
-		const parts = line.split(/[:\s]+/);
+		const parts = line.split(/\s*[:\s]\s*/);
 		const name = parts[0];
 		if (name in this.commands) {
 			const parameters = new ParameterList(parts.slice(1));
@@ -47,6 +48,15 @@ abstract class BaseCommandEngine {
 		} else {
 			throw "No such command.";
 		}
+	}
+
+	protected cleanLine(line: string): string {
+		return line
+		.replace(/\s+/g, " ")
+		.replace(/\s\./g, ".")
+		.replace(/\.+/g, ".")
+		.replace(/\s,/g, ",")
+		.replace(/,+/g, ",");
 	}
 
 	protected abstract handlePositive(line: string): void

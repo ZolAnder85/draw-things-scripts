@@ -54,11 +54,11 @@ abstract class BasePreprocessor {
 		if (original.match(/\|/)) {
 			return this.handleSelect(original.substring(1, original.length - 1));
 		}
-		if (parts = original.match(/{(\d+)}/)) {
+		if (parts = original.match(/{(\+?\d+)}/)) {
 			const count = parseInt(parts[1]);
 			return this.handleTimes(count, 1);
 		}
-		if (parts = original.match(/{(-?\d+\.?|-?\.?\d+|-?\d+\.\d+):(-?\d+\.?|-?\.?\d+|-?\d+\.\d+):(-?\d+\.?|-?\.?\d+|-?\d+\.\d+)}/)) {
+		if (parts = original.match(/{([+-]?\d+\.?\d*|[+-]?\.\d+):([+-]?\d+\.?\d*|[+-]?\.\d+):([+-]?\d+\.?\d*|[+-]?\.\d+)}/)) {
 			const start = parseFloat(parts[1]);
 			const limit = parseFloat(parts[2]);
 			const step = parseFloat(parts[3]);
@@ -114,7 +114,7 @@ abstract class BasePreprocessor {
 	}
 
 	protected handleFunction(content: string): string[] {
-		const parts = content.split(/[:\s]+/);
+		const parts = content.split(/\s*[:\s]\s*/);
 		const name = parts[0];
 		if (name in this.wildcards) {
 			const parameters = new ParameterList(parts.slice(1));
