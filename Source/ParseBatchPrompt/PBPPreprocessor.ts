@@ -24,7 +24,7 @@ class PBPPreprocessor extends BasePreprocessor {
 	}
 
 	private forHandler = (parameters: ParameterList) => {
-		return this.handleFor(parameters.nextInt(), parameters.nextInt(), parameters.nextInt());
+		return this.handleFor(parameters.nextFloat(), parameters.nextFloat(), parameters.nextFloat());
 	}
 
 	private randomDigitsHandler = (parameters: ParameterList) => {

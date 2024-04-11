@@ -99,6 +99,7 @@ abstract class BasePreprocessor {
 
 	protected handleFor(start: number, limit: number, step: number): string[] {
 		const result = [];
+		step = Math.sign(limit - start) * Math.abs(step);
 		if (step > 0) {
 			for (let i = start; i < limit + BasePreprocessor.limitThreshold; i += step) {
 				result.push(String(i));

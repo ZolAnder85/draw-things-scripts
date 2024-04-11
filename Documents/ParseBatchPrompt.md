@@ -84,12 +84,15 @@ black hat
 /generate: black-hat-{@index}-{@model}-{@sampler}.png
 // generates with various models and samplers and saves with their names
 
-{@animal={dog+horse+elephant}} 
+cat
+/generate: initial.png
+
+{@animal={dog+horse+elephant}}
 /load: initial.png
-/strength: {0:1:0.1}
-/generate: {@animal}.png
-/load: {@animal}.png moodboard
-// loads an image and transforms them into animals with a strength-walk
-// loads each intermediate image into the moodboard
-// does this for all given animals
+/strength: {0.1:0.9:0.1}
+/generate: {@animal}-{@i}.png
+/load: {@animal}-{@i}.png custom
+// loads cat image and transforms it into other animals with strength-walking
+// loads each intermediate image into the custom layer
+// does this for all given animal
 ```

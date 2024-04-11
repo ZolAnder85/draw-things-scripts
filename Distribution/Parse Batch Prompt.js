@@ -167,6 +167,7 @@ class BasePreprocessor {
     }
     handleFor(start, limit, step) {
         const result = [];
+        step = Math.sign(limit - start) * Math.abs(step);
         if (step > 0) {
             for (let i = start; i < limit + BasePreprocessor.limitThreshold; i += step) {
                 result.push(String(i));
@@ -205,7 +206,7 @@ class PBPPreprocessor extends BasePreprocessor {
             return this.handleTimes(parameters.nextInt(), parameters.nextInt(1));
         };
         this.forHandler = (parameters) => {
-            return this.handleFor(parameters.nextInt(), parameters.nextInt(), parameters.nextInt());
+            return this.handleFor(parameters.nextFloat(), parameters.nextFloat(), parameters.nextFloat());
         };
         this.randomDigitsHandler = (parameters) => {
             let result = "";
