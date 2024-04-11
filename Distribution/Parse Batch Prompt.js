@@ -1,3 +1,25 @@
+/*
+Parse Batch Prompt
+Version: Beta 0.10.1
+https://github.com/ZolAnder85/draw-things-scripts
+
+Autor: @ZolAnder
+https://github.com/ZolAnder85
+
+This code is licensed under the MIT License:
+https://github.com/ZolAnder85/draw-things-scripts/blob/main/LICENSE.txt
+
+Manual:
+https://github.com/ZolAnder85/draw-things-scripts/blob/main/Documents/ParseBatchPrompt.md
+
+Credits:
+Draw Things webpage:
+https://drawthings.ai/
+Draw Things author: @liuliu
+https://github.com/liuliu
+Draw Things API author: @Gooster
+*/ 
+/// <reference path="DrawThings.d.ts" />
 function prettyFormat(object) {
     return JSON.stringify(object, null, "\t");
 }
@@ -62,6 +84,7 @@ function getPath(name) {
 function getSource(name) {
     return "file://" + filesystem.pictures.path + "/" + name;
 }
+/// <reference path="CommonUtil.ts" />
 class BasePreprocessor {
     constructor() {
         this.localIndex = 1;
@@ -104,11 +127,11 @@ class BasePreprocessor {
         if (original.match(/\|/)) {
             return this.handleSelect(original.substring(1, original.length - 1));
         }
-        if (parts = original.match(/{(\d+)}/)) {
+        if (parts = original.match(/{(\+?\d+)}/)) {
             const count = parseInt(parts[1]);
             return this.handleTimes(count, 1);
         }
-        if (parts = original.match(/{(-?\d+\.?|-?\.?\d+|-?\d+\.\d+):(-?\d+\.?|-?\.?\d+|-?\d+\.\d+):(-?\d+\.?|-?\.?\d+|-?\d+\.\d+)}/)) {
+        if (parts = original.match(/{([+-]?\d+\.?\d*|[+-]?\.\d+):([+-]?\d+\.?\d*|[+-]?\.\d+):([+-]?\d+\.?\d*|[+-]?\.\d+)}/)) {
             const start = parseFloat(parts[1]);
             const limit = parseFloat(parts[2]);
             const step = parseFloat(parts[3]);
@@ -160,7 +183,7 @@ class BasePreprocessor {
         return result;
     }
     handleFunction(content) {
-        const parts = content.split(/[:\s]+/);
+        const parts = content.split(/\s*[:\s]\s*/);
         const name = parts[0];
         if (name in this.wildcards) {
             const parameters = new ParameterList(parts.slice(1));
@@ -174,6 +197,7 @@ class BasePreprocessor {
     }
 }
 BasePreprocessor.limitThreshold = 0.000001;
+/// <reference path="../Library/BasePreprocessor.ts" />
 class PBPPreprocessor extends BasePreprocessor {
     constructor(seed) {
         super();
@@ -220,6 +244,7 @@ class PBPPreprocessor extends BasePreprocessor {
     }
 }
 const defaultConfiguration = {
+    // model: null,
     refinerModel: null,
     refinerStart: 0.5,
     loras: [],
@@ -231,6 +256,7 @@ const defaultConfiguration = {
     guidanceScale: 5,
     imageGuidanceScale: 1.5,
     strength: 1,
+    // seed: 0,
     seedMode: 2,
     width: 512,
     height: 512,
@@ -344,19 +370,20 @@ class ParameterList {
         }
     }
 }
+/// <reference path="CommonUtil.ts" />
+/// <reference path="ParameterList.ts" />
 class BaseCommandEngine {
     handleBlock(block) {
-        console.log("Handling Block:");
-        console.log(block);
-        console.log("\n");
         for (const line of block.split("\n")) {
             this.handleLine(line.trim());
         }
         this.handleEnd();
-        console.log("\n");
     }
     handleLine(line) {
-        if (line.startsWith("/")) {
+        if (line.startsWith("//")) {
+            console.log(line.substring(2).trim());
+        }
+        else if (line.startsWith("/")) {
             try {
                 this.handleCommand(line.substring(1).trim());
             }
@@ -369,14 +396,17 @@ class BaseCommandEngine {
             }
         }
         else if (line.startsWith("-")) {
-            this.handleNegative(line.substring(1).trim());
+            line = line.substring(1).trim();
+            if (line) {
+                this.handleNegative(this.cleanLine(line));
+            }
         }
         else if (line) {
-            this.handlePositive(line);
+            this.handlePositive(this.cleanLine(line));
         }
     }
     handleCommand(line) {
-        const parts = line.split(/[:\s]+/);
+        const parts = line.split(/\s*[:\s]\s*/);
         const name = parts[0];
         if (name in this.commands) {
             const parameters = new ParameterList(parts.slice(1));
@@ -386,6 +416,14 @@ class BaseCommandEngine {
         else {
             throw "No such command.";
         }
+    }
+    cleanLine(line) {
+        return line
+            .replace(/\s+/g, " ")
+            .replace(/\s\./g, ".")
+            .replace(/\.+/g, ".")
+            .replace(/\s,/g, ",")
+            .replace(/,+/g, ",");
     }
 }
 class SimpleCatalogue {
@@ -420,6 +458,7 @@ class IntCatalogue extends SimpleCatalogue {
         return result;
     }
 }
+/// <reference path="../Library/Catalogue.ts" />
 const modelCatalogue = new CKPTCatalogue("model", {
     "LCM-SSD-1B": "lcm_ssd_1b_1_0_f16.ckpt",
     "SDXL-Turbo": "sdxl_turbo_1_0_f16.ckpt",
@@ -453,6 +492,10 @@ const loraCatalogue = new CKPTCatalogue("LoRA", {
     disabled: null
 });
 const controlCatalogue = new CKPTCatalogue("control", {
+    // cannyXL: "controlnet_control_lora_canny_r128_f16.ckpt",
+    // depthXL: "controlnet_control_lora_depth_r128_f16.ckpt",
+    // recolorXL: "controlnet_control_lora_recolor_r128_f16.ckpt",
+    // sketchXL: "controlnet_control_lora_sketch_r128_f16.ckpt",
     cannyXL: "controlnet_control_lora_canny_r256_f16.ckpt",
     depthXL: "controlnet_control_lora_depth_r256_f16.ckpt",
     recolorXL: "controlnet_control_lora_recolor_r256_f16.ckpt",
@@ -484,23 +527,26 @@ const upscalerCatalogue = new CKPTCatalogue("upscaler", {
     disabled: null
 });
 const samplerCatalogue = new IntCatalogue("sampler", {
-    "DPM++-2M-Karras": 0,
-    "Euler-Ancestral": 1,
+    DPMPP2MKarras: 0,
+    EulerAncestral: 1,
     DDIM: 2,
     PLMS: 3,
-    "DPM++-SDE-Karras": 4,
+    DPMPPSDEKarras: 4,
     UniPC: 5,
     LCM: 6,
-    "Euler-A-SubStep": 7,
-    "DPM++-SDE-SubStep": 8,
+    EulerASubStep: 7,
+    DPMPPSDESubStep: 8,
     TCD: 9,
-    "Euler-A-Trailing": 10,
-    "DPM++-SDE-Trailing": 11
+    EulerATrailing: 10,
+    DPMPPSDETrailing: 11
 });
 const faceRestorationCatalogue = new CKPTCatalogue("face restoration", {
     RestoreFormer: "restoreformer_v1.0_f16.ckpt",
     disabled: null
 });
+/// <reference path="../Library/DefaultConfiguration.ts" />
+/// <reference path="../Library/BaseCommandEngine.ts" />
+/// <reference path="Catalogue.ts" />
 class PBPCommandEngine extends BaseCommandEngine {
     constructor(configuration, negative) {
         super();
@@ -839,6 +885,9 @@ class PBPCommandEngine extends BaseCommandEngine {
         }
     }
 }
+/// <reference path="TopComment.ts" />
+/// <reference path="PBPPreprocessor.ts" />
+/// <reference path="PBPCommandEngine.ts" />
 const commandHandler = new PBPCommandEngine(pipeline.configuration, pipeline.prompts.negativePrompt);
 const preprocessor = new PBPPreprocessor(pipeline.configuration.seed);
 for (const block of cleanPrompt().split(/\n\n+/)) {
