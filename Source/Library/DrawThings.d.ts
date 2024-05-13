@@ -90,16 +90,12 @@ interface Configuration {
 	hiresFixHeight: number;
 	hiresFixStrength: number;
 	imageGuidanceScale: number;
+	imagePriorSteps: number;
+	negativePromptForImagePrior: boolean;
+	clipWeight: number;
 	batchCount: number;
 	batchSize: number;
-	negativePromptForImagePrior: boolean;
-	imagePriorSteps: number;
-	clipWeight: number;
 	id: number;
-	tiledDecoding: boolean;
-	decodingTileWidth: number;
-	decodingTileHeight: number;
-	decodingTileOverlap: number;
 	stage2Guidance: number;
 	stage2Steps: number;
 	stage2Shift: number;
@@ -108,6 +104,14 @@ interface Configuration {
 	startFrameGuidance: number;
 	guidingFrameNoise: number;
 	motionScale: number
+	tiledDecoding: boolean;
+	decodingTileWidth: number;
+	decodingTileHeight: number;
+	decodingTileOverlap: number;
+	tiledDiffusion: boolean;
+	diffusionTileWidth: number;
+	diffusionTileHeight: number;
+	diffusionTileOverlap: number;
 }
 
 interface PipelinePrompts {

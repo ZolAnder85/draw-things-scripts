@@ -1,3 +1,4 @@
+/// <reference path="../Library/CommonUtil.ts" />
 /// <reference path="../Library/DefaultConfiguration.ts" />
 /// <reference path="../Library/BaseCommandEngine.ts" />
 /// <reference path="Catalogue.ts" />
@@ -32,8 +33,8 @@ class PBPCommandEngine extends BaseCommandEngine {
 
 	private buildAPIMap(): CommandMap {
 		const result = {};
-		for (const key in this.initialConfiguration) {
-			switch (typeof this.initialConfiguration[key]) {
+		for (const key in defaultConfiguration) {
+			switch (typeof defaultConfiguration[key]) {
 				case "string":
 					result[key] = (parameters: ParameterList) => this.configuration[key] = parameters.nextString();
 					break;
@@ -75,9 +76,6 @@ class PBPCommandEngine extends BaseCommandEngine {
 			),
 			cfg: this.createStandardHandler(
 				"guidanceScale", "float", undefined
-			),
-			strength: this.createStandardHandler(
-				"strength", "float", undefined
 			),
 			seed: this.handleSeed,
 			seedMode: this.createStandardHandler(

@@ -19,72 +19,6 @@ Draw Things author: @liuliu
 https://github.com/liuliu
 Draw Things API author: @Gooster
 */ 
-/// <reference path="DrawThings.d.ts" />
-function prettyFormat(object) {
-    return JSON.stringify(object, null, "\t");
-}
-function prettyPrint(object) {
-    console.log(prettyFormat(object));
-}
-function getAllPropertyNames(object) {
-    const result = [];
-    let current = object;
-    while (current) {
-        result.push(...Object.getOwnPropertyNames(current));
-        current = Object.getPrototypeOf(current);
-    }
-    return result;
-}
-function printProperties(object, propertyNames) {
-    for (const name of propertyNames) {
-        const value = object[name];
-        if (typeof value == "object") {
-            console.log(name + ": " + prettyFormat(value));
-        }
-        else {
-            console.log(name + ": " + value);
-        }
-    }
-}
-function printOwnProperties(object) {
-    printProperties(object, Object.getOwnPropertyNames(object));
-}
-function printAllProperties(object) {
-    printProperties(object, getAllPropertyNames(object));
-}
-function cleanPrompt() {
-    return pipeline.prompts.prompt.trim().replace(/\r\n|\r|\u2028/g, "\n");
-}
-class XSRandom {
-    static next(seed) {
-        seed = seed ^ (seed << 13);
-        seed = seed ^ (seed >> 17);
-        seed = seed ^ (seed << 5);
-        return seed >>> 0;
-    }
-    constructor(seed) {
-        this.seed = seed;
-    }
-    next() {
-        const result = this.seed;
-        this.seed = XSRandom.next(this.seed);
-        return result;
-    }
-}
-function formatIndex(index, digits = 1) {
-    let result = index.toString();
-    while (result.length < digits) {
-        result = "0" + result;
-    }
-    return result;
-}
-function getPath(name) {
-    return filesystem.pictures.path + "/" + name;
-}
-function getSource(name) {
-    return "file://" + filesystem.pictures.path + "/" + name;
-}
-/// <reference path="CommonUtil.ts" />
 class BasePreprocessor {
     constructor() {
         this.localIndex = 1;
@@ -118,7 +52,7 @@ class BasePreprocessor {
     }
     handleWildcard(original) {
         let parts;
-        if (parts = original.match(/{@(\w+)=(.+)}/)) {
+        if (parts = original.match(/{@(\w+)=(.*)}/)) {
             return this.handleAssignment(parts[1], parts[2]);
         }
         if (original.match(/\+/)) {
@@ -244,6 +178,71 @@ class PBPPreprocessor extends BasePreprocessor {
         this.random = new XSRandom(seed);
     }
 }
+/// <reference path="../Library/DrawThings.d.ts" />
+function prettyFormat(object) {
+    return JSON.stringify(object, null, "\t");
+}
+function prettyPrint(object) {
+    console.log(prettyFormat(object));
+}
+function getAllPropertyNames(object) {
+    const result = [];
+    let current = object;
+    while (current) {
+        result.push(...Object.getOwnPropertyNames(current));
+        current = Object.getPrototypeOf(current);
+    }
+    return result;
+}
+function printProperties(object, propertyNames) {
+    for (const name of propertyNames) {
+        const value = object[name];
+        if (typeof value == "object") {
+            console.log(name + ": " + prettyFormat(value));
+        }
+        else {
+            console.log(name + ": " + value);
+        }
+    }
+}
+function printOwnProperties(object) {
+    printProperties(object, Object.getOwnPropertyNames(object));
+}
+function printAllProperties(object) {
+    printProperties(object, getAllPropertyNames(object));
+}
+function cleanString(value) {
+    return value.trim().replace(/\r\n|\r|\u2028/g, "\n");
+}
+class XSRandom {
+    static next(seed) {
+        seed = seed ^ (seed << 13);
+        seed = seed ^ (seed >> 17);
+        seed = seed ^ (seed << 5);
+        return seed >>> 0;
+    }
+    constructor(seed) {
+        this.seed = seed;
+    }
+    next() {
+        const result = this.seed;
+        this.seed = XSRandom.next(this.seed);
+        return result;
+    }
+}
+function formatIndex(index, digits = 1) {
+    let result = index.toString();
+    while (result.length < digits) {
+        result = "0" + result;
+    }
+    return result;
+}
+function getPath(name) {
+    return filesystem.pictures.path + "/" + name;
+}
+function getSource(name) {
+    return "file://" + filesystem.pictures.path + "/" + name;
+}
 const defaultConfiguration = {
     // model: null,
     refinerModel: null,
@@ -279,10 +278,15 @@ const defaultConfiguration = {
     maskBlurOutset: 0,
     preserveOriginalAfterInpaint: true,
     sharpness: 0,
-    aestheticScore: 5,
+    aestheticScore: 6,
     negativeAestheticScore: 2,
     clipSkip: 1,
     zeroNegativePrompt: false,
+    imagePriorSteps: 5,
+    negativePromptForImagePrior: true,
+    clipWeight: 1,
+    batchCount: 1,
+    batchSize: 1,
     stage2Guidance: 1,
     stage2Steps: 10,
     stage2Shift: 1,
@@ -291,15 +295,14 @@ const defaultConfiguration = {
     startFrameGuidance: 1,
     guidingFrameNoise: 0.02,
     motionScale: 127,
-    imagePriorSteps: 5,
-    negativePromptForImagePrior: true,
-    clipWeight: 1,
-    batchCount: 1,
-    batchSize: 1,
     tiledDecoding: false,
     decodingTileWidth: 512,
     decodingTileHeight: 512,
-    decodingTileOverlap: 128
+    decodingTileOverlap: 128,
+    tiledDiffusion: false,
+    diffusionTileHeight: 1536,
+    diffusionTileOverlap: 256,
+    diffusionTileWidth: 1536
 };
 class ParameterList {
     constructor(parameters) {
@@ -371,7 +374,6 @@ class ParameterList {
         }
     }
 }
-/// <reference path="CommonUtil.ts" />
 /// <reference path="ParameterList.ts" />
 class BaseCommandEngine {
     handleBlock(block) {
@@ -461,46 +463,50 @@ class IntCatalogue extends SimpleCatalogue {
 }
 /// <reference path="../Library/Catalogue.ts" />
 const modelCatalogue = new CKPTCatalogue("model", {
-    "LCM-SSD-1B": "lcm_ssd_1b_1_0_f16.ckpt",
-    "SDXL-Turbo": "sdxl_turbo_1_0_f16.ckpt",
-    ZAMixRVBase: "zamix_rv_base_f32.ckpt",
-    ZAMixRVFast: "zamix_rv_fast_f16.ckpt",
-    ZAMixRVUltra: "zamix_rv_ultra_f16.ckpt",
-    ZAMixDSBase: "zamix_ds_base_f32.ckpt",
-    ZAMixDSFast: "zamix_ds_fast_f16.ckpt",
-    ZAMixDSUltra: "zamix_ds_ultra_f16.ckpt",
-    CyberRealisticClassicBase: "cyberrealistic_classic_2_0_base_f16.ckpt",
-    CyberRealisticClassicFast: "cyberrealistic_classic_2_0_fast_f16.ckpt",
-    CyberRealisticClassicUltra: "cyberrealistic_classic_2_0_ultra_f16.ckpt",
-    RealisticVisionBase: "realistic_vision_5_1_base_f16.ckpt",
-    RealisticVisionFast: "realistic_vision_5_1_fast_f16.ckpt",
-    RealisticVisionUltra: "realistic_vision_5_1_ultra_f16.ckpt",
-    DreamShaperBase: "dreamshaper_8_0_base_f16.ckpt",
-    DreamShaperFast: "dreamshaper_8_0_fast_f16.ckpt",
-    DreamShaperUltra: "dreamshaper_8_0_ultra_f16.ckpt",
+    "LCM-SSD-1B-1.0": "lcm_ssd_1b_1_0_f16.ckpt",
+    "SDXL-Turbo-1.0": "sdxl_turbo_1_0_f16.ckpt",
+    "ZAMix-RV-Base": "zamix_rv_base_f16.ckpt",
+    "ZAMix-RV-Fast": "zamix_rv_fast_f16.ckpt",
+    "ZAMix-RV-Ultra": "zamix_rv_ultra_f16.ckpt",
+    "ZAMix-DS-Base": "zamix_ds_base_f16.ckpt",
+    "ZAMix-DS-Fast": "zamix_ds_fast_f16.ckpt",
+    "ZAMix-DS-Ultra": "zamix_ds_ultra_f16.ckpt",
+    "RealVisXL-Base": "realvisxl_base_f16.ckpt",
+    "RealVisXL-Lightning": "realvisxl_lightning_f16.ckpt",
+    "DreamShaper-XL-Base": "dreamshaper_xl_base_f16.ckpt",
+    "DreamShaper-XL-Turbo": "dreamshaper_xl_turbo_f16.ckpt",
+    "Realistic-Vision-5.1-Base": "realistic_vision_5_1_base_f16.ckpt",
+    "Realistic-Vision-5.1-Fast": "realistic_vision_5_1_fast_f16.ckpt",
+    "Realistic-Vision-5.1-Ultra": "realistic_vision_5_1_ultra_f16.ckpt",
+    "CyberRealistic-Classic-1.6-Base": "cyberrealistic_classic_1_6_base_f16.ckpt",
+    "CyberRealistic-Classic-2.0-Base": "cyberrealistic_classic_2_0_base_f16.ckpt",
+    "CyberRealistic-Classic-2.0-Fast": "cyberrealistic_classic_2_0_fast_f16.ckpt",
+    "CyberRealistic-Classic-2.0-Ultra": "cyberrealistic_classic_2_0_ultra_f16.ckpt",
+    "DreamShaper-8.0-Base": "dreamshaper_8_0_base_f16.ckpt",
+    "DreamShaper-8.0-Fast": "dreamshaper_8_0_fast_f16.ckpt",
+    "DreamShaper-8.0-Ultra": "dreamshaper_8_0_ultra_f16.ckpt",
     disabled: null
 });
 const loraCatalogue = new CKPTCatalogue("LoRA", {
-    "LCM-SD-15": "lcm_sd_15_lora_f16.ckpt",
-    "TCD-SDXL": "tcd_sdxl_lora_f16.ckpt",
-    "Lightning": "lightning_lora_f16.ckpt",
-    "SDXL-Noise-OS": "sdxl_noise_os_lora_f16.ckpt",
+    "LCM-SDXL-LoRA": "lcm_sdxl_lora_f16.ckpt",
+    "TCD-SDXL-LoRA": "tcd_sdxl_lora_f16.ckpt",
+    "Lightning-SDXL-8-LoRA": "lightning_sdxl_8_lora_f16.ckpt",
+    "Hyper-SDXL-8-LoRA": "hyper_sdxl_8_lora_f16.ckpt",
+    "LCM-SD-15-LoRA": "lcm_sd_15_lora_f16.ckpt",
+    "TCD-SD-15-LoRA": "tcd_sd_15_lora_f16.ckpt",
+    "Hyper-SD-15-8-LoRA": "hyper_sd_15_8_lora_f16.ckpt",
     "Add-Brightness": "add_brightness_lora_f16.ckpt",
     "TO8-Contrast": "to8_contrast_lora_f16.ckpt",
-    "EPI-Noise_OS": "epi_noise_os_lora_f16.ckpt",
-    Schmanzy: "schmanzy_sdxl_lora_f16.ckpt",
-    PaperCut: "papercut_sdxl_lora_f16.ckpt",
+    "EPI-Noise-OS": "epi_noise_os_lora_f16.ckpt",
+    "Schmanzy-SDXL": "schmanzy_sdxl_lora_f16.ckpt",
+    "Papercut-SDX": "papercut_sdxl_lora_f16.ckpt",
     disabled: null
 });
 const controlCatalogue = new CKPTCatalogue("control", {
-    // cannyXL: "controlnet_control_lora_canny_r128_f16.ckpt",
-    // depthXL: "controlnet_control_lora_depth_r128_f16.ckpt",
-    // recolorXL: "controlnet_control_lora_recolor_r128_f16.ckpt",
-    // sketchXL: "controlnet_control_lora_sketch_r128_f16.ckpt",
-    cannyXL: "controlnet_control_lora_canny_r256_f16.ckpt",
-    depthXL: "controlnet_control_lora_depth_r256_f16.ckpt",
-    recolorXL: "controlnet_control_lora_recolor_r256_f16.ckpt",
-    sketchXL: "controlnet_control_lora_sketch_r256_f16.ckpt",
+    cannyXL: "controlnet_control_lora_canny_r128_f16.ckpt",
+    depthXL: "controlnet_control_lora_depth_r128_f16.ckpt",
+    recolorXL: "controlnet_control_lora_recolor_r128_f16.ckpt",
+    sketchXL: "controlnet_control_lora_sketch_r128_f16.ckpt",
     IPPlusXL: "ip_adapter_plus_xl_base_open_clip_h14_f16.ckpt",
     IPFaceXL: "ip_adapter_plus_face_xl_base_open_clip_h14_f16.ckpt",
     canny: "controlnet_canny_1.x_v1.1_f16.ckpt",
@@ -523,28 +529,29 @@ const upscalerCatalogue = new CKPTCatalogue("upscaler", {
     "Real-ESRGAN-X4": "realesrgan_x4plus_f16.ckpt",
     "Real-ESRGAN-Anime": "realesrgan_x4plus_anime_f16.ckpt",
     "Universal-Upscaler": "esrgan_4x_universal_upscaler_v2_sharp_f16.ckpt",
-    Remacri: "remacri_4x_f16.ckpt",
-    UltraSharp: "4x_ultrasharp_f16.ckpt",
+    "Remacri": "remacri_4x_f16.ckpt",
+    "UltraSharp": "4x_ultrasharp_f16.ckpt",
     disabled: null
 });
 const samplerCatalogue = new IntCatalogue("sampler", {
-    DPMPP2MKarras: 0,
-    EulerAncestral: 1,
-    DDIM: 2,
-    PLMS: 3,
-    DPMPPSDEKarras: 4,
-    UniPC: 5,
-    LCM: 6,
-    EulerASubStep: 7,
-    DPMPPSDESubStep: 8,
-    TCD: 9,
-    EulerATrailing: 10,
-    DPMPPSDETrailing: 11
+    "DPM++-2M-Karras": 0,
+    "Euler-Ancestral": 1,
+    "DDIM": 2,
+    "PLMS": 3,
+    "DPM++-SDE-Karras": 4,
+    "UniPC": 5,
+    "LCM": 6,
+    "Euler-A-SubStep": 7,
+    "DPM++-SDE-SubStep": 8,
+    "TCD": 9,
+    "Euler-A-Trailing": 10,
+    "DPM++-SDE-Trailing": 11
 });
 const faceRestorationCatalogue = new CKPTCatalogue("face restoration", {
     RestoreFormer: "restoreformer_v1.0_f16.ckpt",
     disabled: null
 });
+/// <reference path="../Library/CommonUtil.ts" />
 /// <reference path="../Library/DefaultConfiguration.ts" />
 /// <reference path="../Library/BaseCommandEngine.ts" />
 /// <reference path="Catalogue.ts" />
@@ -753,8 +760,8 @@ class PBPCommandEngine extends BaseCommandEngine {
     }
     buildAPIMap() {
         const result = {};
-        for (const key in this.initialConfiguration) {
-            switch (typeof this.initialConfiguration[key]) {
+        for (const key in defaultConfiguration) {
+            switch (typeof defaultConfiguration[key]) {
                 case "string":
                     result[key] = (parameters) => this.configuration[key] = parameters.nextString();
                     break;
@@ -785,7 +792,6 @@ class PBPCommandEngine extends BaseCommandEngine {
             control: this.handleControl,
             sampler: this.createStandardHandler("sampler", samplerCatalogue, undefined),
             cfg: this.createStandardHandler("guidanceScale", "float", undefined),
-            strength: this.createStandardHandler("strength", "float", undefined),
             seed: this.handleSeed,
             seedMode: this.createStandardHandler("seedMode", seedModeCatalogue, undefined),
             size: this.handleSize,
@@ -891,6 +897,7 @@ class PBPCommandEngine extends BaseCommandEngine {
 /// <reference path="PBPCommandEngine.ts" />
 const commandHandler = new PBPCommandEngine(pipeline.configuration, pipeline.prompts.negativePrompt);
 const preprocessor = new PBPPreprocessor(pipeline.configuration.seed);
-for (const block of cleanPrompt().split(/\n\n+/)) {
+const input = cleanString(pipeline.prompts.prompt);
+for (const block of input.split(/\n\n+/)) {
     preprocessor.handleBlock(block, block => commandHandler.handleBlock(block));
 }

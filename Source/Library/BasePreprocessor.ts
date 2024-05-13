@@ -1,5 +1,3 @@
-/// <reference path="CommonUtil.ts" />
-
 type WildcardHandler = (parameters: ParameterList) => string[];
 
 type WildcardMap = {[key: string]: WildcardHandler};
@@ -45,7 +43,7 @@ abstract class BasePreprocessor {
 
 	public handleWildcard(original: string): string[] {
 		let parts;
-		if (parts = original.match(/{@(\w+)=(.+)}/)) {
+		if (parts = original.match(/{@(\w+)=(.*)}/)) {
 			return this.handleAssignment(parts[1], parts[2]);
 		}
 		if (original.match(/\+/)) {

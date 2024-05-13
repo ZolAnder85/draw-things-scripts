@@ -1,4 +1,3 @@
-/// <reference path="CommonUtil.ts" />
 /// <reference path="ParameterList.ts" />
 
 type CommandHandler = (parameters: ParameterList) => void;

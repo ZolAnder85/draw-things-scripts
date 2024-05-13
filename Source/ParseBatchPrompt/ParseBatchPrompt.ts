@@ -5,6 +5,7 @@
 const commandHandler = new PBPCommandEngine(pipeline.configuration, pipeline.prompts.negativePrompt);
 const preprocessor = new PBPPreprocessor(pipeline.configuration.seed);
 
-for(const block of cleanPrompt().split(/\n\n+/)) {
+const input = cleanString(pipeline.prompts.prompt);
+for(const block of input.split(/\n\n+/)) {
 	preprocessor.handleBlock(block, block => commandHandler.handleBlock(block));
 }
