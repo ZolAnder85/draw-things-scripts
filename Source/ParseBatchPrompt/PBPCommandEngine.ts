@@ -310,8 +310,8 @@ class PBPCommandEngine extends BaseCommandEngine {
 
 	private swapVertical(widthKey: string, heightKey: string) {
 		const width = this.configuration[widthKey];
-		this.configuration[widthKey] = Math.max(width, this.configuration[heightKey]);
-		this.configuration[heightKey] = Math.min(width, this.configuration[heightKey]);
+		this.configuration[widthKey] = Math.min(width, this.configuration[heightKey]);
+		this.configuration[heightKey] = Math.max(width, this.configuration[heightKey]);
 	}
 
 	private handleAspect = (parameters: ParameterList) => {

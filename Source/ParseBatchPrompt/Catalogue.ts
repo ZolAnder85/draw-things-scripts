@@ -1,44 +1,50 @@
 /// <reference path="../Library/Catalogue.ts" />
 
 const modelCatalogue = new CKPTCatalogue("model", {
-	"LCM-SSD-1B-1.0": "lcm_ssd_1b_1_0_f16.ckpt",
-	"SDXL-Turbo-1.0": "sdxl_turbo_1_0_f16.ckpt",
-	"ZAMix-RV-Base": "zamix_rv_base_f16.ckpt",
-	"ZAMix-RV-Fast": "zamix_rv_fast_f16.ckpt",
-	"ZAMix-RV-Ultra": "zamix_rv_ultra_f16.ckpt",
-	"ZAMix-DS-Base": "zamix_ds_base_f16.ckpt",
-	"ZAMix-DS-Fast": "zamix_ds_fast_f16.ckpt",
-	"ZAMix-DS-Ultra": "zamix_ds_ultra_f16.ckpt",
-	"RealVisXL-Base": "realvisxl_base_f16.ckpt",
-	"RealVisXL-Lightning": "realvisxl_lightning_f16.ckpt",
-	"DreamShaper-XL-Base": "dreamshaper_xl_base_f16.ckpt",
-	"DreamShaper-XL-Turbo": "dreamshaper_xl_turbo_f16.ckpt",
+	"LCM-SSD-1B-1.0": "lcm_ssd_1b_1.0_f16.ckpt",
+	"SDXL-Turbo-1.0": "sdxl_turbo_1.0_f16.ckpt",
+	"ZAMix-DS1-Base": "zamix_ds1_base_f16.ckpt",
+	"ZAMix-DS1-T35": "zamix_ds1_t35_f16.ckpt",
+	"ZAMix-DS1-Fast": "zamix_ds1_fast_f16.ckpt",
+	"ZAMix-RV1-Base": "zamix_rv1_base_f16.ckpt",
+	"ZAMix-RV1-T35": "zamix_rv1_t35_f16.ckpt",
+	"ZAMix-RV1-Fast": "zamix_rv1_fast_f16.ckpt",
+	"ZAMix-DS2-Base": "zamix_ds2_base_f16.ckpt",
+	"ZAMix-DS2-T35": "zamix_ds2_t35_f16.ckpt",
+	"ZAMix-DS2-Fast": "zamix_ds2_fast_f16.ckpt",
+	"ZAMix-RV2-Base": "zamix_rv2_base_f16.ckpt",
+	"ZAMix-RV2-T35": "zamix_rv2_t35_f16.ckpt",
+	"ZAMix-RV2-Fast": "zamix_rv2_fast_f16.ckpt",
+	"DreamShaper-XL": "dreamshaper_xl_f16.ckpt",
+	"RealVisXL-2.0": "realvisxl_2.0_f16.ckpt",
+	"RealVisXL-4.0": "realvisxl_4.0_f16.ckpt",
+	"NightVision-XL": "nightvision_xl_f16.ckpt",
+	"SDXL-Flash-1.0": "sdxl_flash_1.0_f16.ckpt",
 	"Realistic-Vision-5.1-Base": "realistic_vision_5_1_base_f16.ckpt",
 	"Realistic-Vision-5.1-Fast": "realistic_vision_5_1_fast_f16.ckpt",
-	"Realistic-Vision-5.1-Ultra": "realistic_vision_5_1_ultra_f16.ckpt",
 	"CyberRealistic-Classic-1.6-Base": "cyberrealistic_classic_1_6_base_f16.ckpt",
+	"CyberRealistic-Classic-1.6-Fast": "cyberrealistic_classic_1_6_fast_f16.ckpt",
 	"CyberRealistic-Classic-2.0-Base": "cyberrealistic_classic_2_0_base_f16.ckpt",
 	"CyberRealistic-Classic-2.0-Fast": "cyberrealistic_classic_2_0_fast_f16.ckpt",
-	"CyberRealistic-Classic-2.0-Ultra": "cyberrealistic_classic_2_0_ultra_f16.ckpt",
 	"DreamShaper-8.0-Base": "dreamshaper_8_0_base_f16.ckpt",
 	"DreamShaper-8.0-Fast": "dreamshaper_8_0_fast_f16.ckpt",
-	"DreamShaper-8.0-Ultra": "dreamshaper_8_0_ultra_f16.ckpt",
 	disabled: null
 });
 
 const loraCatalogue = new CKPTCatalogue("LoRA", {
 	"LCM-SDXL-LoRA": "lcm_sdxl_lora_f16.ckpt",
+	"SDXL-Turbo-LoRA": "sdxl_turbo_lora_f16.ckpt",
 	"TCD-SDXL-LoRA": "tcd_sdxl_lora_f16.ckpt",
 	"Lightning-SDXL-8-LoRA": "lightning_sdxl_8_lora_f16.ckpt",
 	"Hyper-SDXL-8-LoRA": "hyper_sdxl_8_lora_f16.ckpt",
+	"Schmanzy-SDXL": "schmanzy_sdxl_lora_f16.ckpt",
+	"Papercut-SDXL": "papercut_sdxl_lora_f16.ckpt",
 	"LCM-SD-15-LoRA": "lcm_sd_15_lora_f16.ckpt",
 	"TCD-SD-15-LoRA": "tcd_sd_15_lora_f16.ckpt",
 	"Hyper-SD-15-8-LoRA": "hyper_sd_15_8_lora_f16.ckpt",
 	"Add-Brightness": "add_brightness_lora_f16.ckpt",
 	"TO8-Contrast": "to8_contrast_lora_f16.ckpt",
 	"EPI-Noise-OS": "epi_noise_os_lora_f16.ckpt",
-	"Schmanzy-SDXL": "schmanzy_sdxl_lora_f16.ckpt",
-	"Papercut-SDX": "papercut_sdxl_lora_f16.ckpt",
 	disabled: null
 });
 
@@ -88,7 +94,12 @@ const samplerCatalogue = new IntCatalogue("sampler", {
 	"DPM++-SDE-SubStep": 8,
 	"TCD": 9,
 	"Euler-A-Trailing": 10,
-	"DPM++-SDE-Trailing": 11
+	"DPM++-SDE-Trailing": 11,
+	"DPM++-2M-AYS": 12,
+	"Euler-A-AYS": 13,
+	"DPM++-SDE-AYS": 14,
+	"DPM++-2M-Trailing": 15,
+	"DDIM-Trailing": 16
 });
 
 const faceRestorationCatalogue = new CKPTCatalogue("face restoration", {
